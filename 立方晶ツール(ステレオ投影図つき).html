@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>立方晶 指数決定ツール + 極点球儀 + ステレオ投影図</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+html, body{ margin:0; padding:0; }
+body{ background:#0b0d10; }
+
+/* ============ 面指数決定ツール（#view-tool の中だけに適用・スコープ済み） ============ */
+
+  #view-tool{
+    --bg: #0B1220;
+    --panel: #121C30;
+    --panel-2: #0F1729;
+    --line: #24334E;
+    --text: #E7ECF3;
+    --text-dim: #8FA0BE;
+    --teal: #4FD1C5;
+    --amber: #F0B86E;
+    --rose: #E8677D;
+  }
+  #view-tool *{ box-sizing: border-box; }
+  #view-tool{ margin:0; padding:0; }
+  #view-tool{
+    background: var(--bg);
+    background-image:
+      linear-gradient(rgba(79,209,197,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,209,197,0.035) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--text);
+    font-family: 'Source Serif 4', Georgia, serif;
+    line-height: 1.6;
+    padding: 48px 20px 80px;
+  }
+  #view-tool .wrap{ max-width: 760px; margin: 0 auto; }
+
+  #view-tool .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--teal);
+    letter-spacing: 0.02em;
+    margin-bottom: 10px;
+  }
+  #view-tool h1{
+    font-size: 34px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: #fff;
+  }
+  #view-tool .lede{
+    color: var(--text-dim);
+    font-size: 16.5px;
+    max-width: 60ch;
+    margin: 0 0 36px;
+  }
+
+  #view-tool /* --- triangle hero --- */
+  .hero{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 28px 20px 22px;
+    margin-bottom: 40px;
+  }
+  #view-tool svg{ display:block; margin: 0 auto; }
+  #view-tool .vlabel{
+    font-family:'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 22px;
+    fill: #fff;
+  }
+  #view-tool .vsub{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    fill: var(--text-dim);
+  }
+  #view-tool .elabel{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    fill: var(--amber);
+  }
+  #view-tool .tri-edge{ stroke: var(--line); stroke-width: 1.5; fill: none; }
+  #view-tool .tri-vertex{ fill: var(--panel-2); stroke: var(--teal); stroke-width: 1.5; }
+
+  #view-tool /* --- form --- */
+  .panel{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 26px 24px;
+    margin-bottom: 24px;
+  }
+  #view-tool .panel h2{
+    font-size: 15px;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin: 0 0 18px;
+    text-transform: none;
+  }
+  #view-tool .row{
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  #view-tool .field{
+    flex: 1 1 140px;
+  }
+  #view-tool .field label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  #view-tool .field input{
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 15px;
+    padding: 9px 10px;
+    border-radius: 3px;
+  }
+  #view-tool .field input:focus{
+    outline: none;
+    border-color: var(--teal);
+  }
+  #view-tool .hkl-group{
+    display:flex;
+    gap: 8px;
+  }
+  #view-tool .hkl-group input{ text-align:center; }
+
+  #view-tool .divider{
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 20px 0;
+  }
+
+  #view-tool button{
+    background: var(--teal);
+    color: #05201D;
+    border: none;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 14.5px;
+    font-weight: 600;
+    padding: 12px 22px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+  #view-tool button:hover{ background: #6FE0D6; }
+  #view-tool button:active{ transform: translateY(1px); }
+
+  #view-tool .formula{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 14px 16px;
+    margin-top: 4px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  #view-tool /* --- results --- */
+  .status{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 18px 0 14px;
+  }
+  #view-tool table{
+    width: 100%;
+    border-collapse: collapse;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+  }
+  #view-tool th{
+    text-align: left;
+    color: var(--text-dim);
+    font-weight: 500;
+    font-size: 11.5px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  #view-tool td{
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--panel-2);
+  }
+  #view-tool tr:hover td{ background: rgba(79,209,197,0.05); }
+  #view-tool .hkl{ color: #fff; font-weight: 500; }
+  #view-tool .err-good{ color: var(--teal); }
+  #view-tool .err-mid{ color: var(--amber); }
+  #view-tool .err-bad{ color: var(--rose); }
+  #view-tool .empty{
+    color: var(--text-dim);
+    font-size: 14px;
+    padding: 20px 0;
+  }
+  #view-tool .note{
+    color: var(--text-dim);
+    font-size: 13.5px;
+    margin-top: 28px;
+  }
+
+#view-tool {
+  display:block;
+  min-height:100vh;
+}
+
+#view-tool .hkl-link{
+  color:#fff;
+  text-decoration: underline dotted rgba(79,209,197,0.7);
+  text-underline-offset: 3px;
+  cursor:pointer;
+}
+#view-tool .hkl-link:hover{ color: var(--teal); }
+
+#view-tool .globe-btn{
+  background: var(--panel-2);
+  color: var(--teal);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 5px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#view-tool .globe-btn:hover{ background: var(--panel); border-color: var(--teal); }
+
+/* ============ 極点球儀（#view-globe の中だけに適用・スコープ済み） ============ */
+
+  #view-globe{
+    --bg: #0b0d10;
+    --panel: #14171c;
+    --panel-border: #23272e;
+    --ink: #d7dbe0;
+    --ink-dim: #838c96;
+    --accent-100: #e3a13d;
+    --accent-110: #3fb6ac;
+    --accent-111: #d9585a;
+    --dot: #7c8794;
+    --p1: #fde68a;
+    --p2: #93c5fd;
+    --p3: #f9a8d4;
+  }
+  #view-globe *{ box-sizing: border-box; }
+  #view-globe{
+    margin:0; padding:0; height:100%; background: var(--bg);
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Segoe UI", sans-serif;
+    color: var(--ink);
+    overflow: hidden;
+  }
+  #view-globe #app{ position:relative; width:100%; height:100vh; }
+  #view-globe #canvas-wrap{ position:absolute; inset:0; }
+  #view-globe canvas{ display:block; touch-action: none; cursor: grab; }
+  #view-globe canvas.dragging{ cursor: grabbing; }
+
+  #view-globe #topbar{
+    position:absolute; top:0; left:0; right:0;
+    display:flex; align-items:flex-start; gap:10px;
+    padding: 12px 14px;
+    background: linear-gradient(to bottom, rgba(11,13,16,0.92), rgba(11,13,16,0));
+    pointer-events:none;
+    flex-wrap: wrap;
+  }
+  #view-globe #topbar > *{ pointer-events:auto; }
+  #view-globe #title{
+    font-size: 13px; letter-spacing: 0.02em; color: var(--ink-dim);
+    white-space: nowrap; margin-right: 4px; margin-top: 8px;
+  }
+  #view-globe #title b{ color: var(--ink); font-weight: 600; }
+
+  #view-globe #searchwrap{ display:flex; flex-direction:column; gap:4px; }
+  #view-globe #searchbox{
+    display:flex; align-items:center; gap:6px;
+    background: var(--panel); border:1px solid var(--panel-border);
+    border-radius: 8px; padding: 6px 8px;
+  }
+  #view-globe #searchbox input{
+    background:transparent; border:none; outline:none;
+    color: var(--ink); font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 15px; width: 190px;
+  }
+  #view-globe #searchbox input::placeholder{ color: var(--ink-dim); font-size: 13px; }
+  #view-globe #searchbox button{
+    background: #2a2f37; border:1px solid #363c45; color: var(--ink);
+    border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor:pointer;
+  }
+  #view-globe #searchbox button:hover{ background:#333944; }
+  #view-globe #search-hint{ font-size: 10.5px; color: var(--ink-dim); padding-left: 2px; }
+  #view-globe #search-msg{ font-size: 12px; color: var(--ink-dim); max-width: 220px; padding-left: 2px; }
+  #view-globe #search-msg.err{ color: var(--accent-111); }
+
+  #view-globe #reset-btn{
+    background: var(--panel); border:1px solid var(--panel-border); color: var(--ink);
+    border-radius: 8px; padding: 8px 10px; font-size: 12px; cursor:pointer; margin-top: 0;
+  }
+  #view-globe #reset-btn:hover{ background:#1b1f25; }
+
+  #view-globe #legend{
+    position:absolute; right:14px; top:14px;
+    background: var(--panel); border:1px solid var(--panel-border);
+    border-radius: 10px; padding: 10px 12px; font-size: 12px;
+    line-height: 1.9; color: var(--ink-dim);
+  }
+  #view-globe #legend .row{ display:flex; align-items:center; gap:8px; }
+  #view-globe #legend .sw{ width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+
+  #view-globe #info{
+    position:absolute; left:14px; bottom:14px;
+    background: var(--panel); border:1px solid var(--panel-border);
+    border-radius: 10px; padding: 12px 14px; min-width: 190px; max-width: 280px;
+    font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  #view-globe #info .idx{ font-size: 20px; letter-spacing: 0.03em; color: var(--ink); }
+  #view-globe #info .sub{ font-size: 11px; color: var(--ink-dim); margin-top: 4px; font-family: -apple-system, sans-serif; }
+  #view-globe #info.empty .idx{ color: var(--ink-dim); font-size: 13px; }
+  #view-globe #info .angles{ margin-top: 8px; border-top: 1px solid var(--panel-border); padding-top: 8px; }
+  #view-globe #info .angles div{ font-size: 13px; margin-top: 3px; }
+  #view-globe #info .pt-row{ display:flex; align-items:center; gap:6px; font-size:14px; margin-top:2px; }
+  #view-globe #info .pt-sw{ width:8px; height:8px; border-radius:50%; flex:0 0 auto; }
+
+  #view-globe #help{
+    position:absolute; right:14px; bottom:14px;
+    max-width: 230px; font-size: 11.5px; color: var(--ink-dim);
+    line-height: 1.6; text-align: right;
+  }
+  #view-globe #help b{ color: var(--ink); }
+
+  #view-globe #tooltip{
+    position:absolute; pointer-events:none; z-index: 5;
+    background: rgba(20,23,28,0.95); border:1px solid var(--panel-border);
+    border-radius: 6px; padding: 4px 8px; font-size: 13px;
+    font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+    color: var(--ink); display:none; white-space:nowrap;
+    transform: translate(-50%, -130%);
+  }
+
+  #view-globe #inside-badge{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    pointer-events:none; display:none;
+    background: rgba(20,23,28,0.85); border:1px solid var(--panel-border);
+    border-radius: 999px; padding: 6px 14px; font-size: 12px; color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+
+  @media (max-width: 560px){
+    #view-globe #legend{ display:none; }
+    #view-globe #help{ display:none; }
+    #view-globe #title{ display:none; }
+    #view-globe #searchbox input{ width: 130px; }
+  }
+
+#view-globe{
+  display:none;
+  width:100%;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* ============ ステレオ投影図（#view-stereo） ============ */
+#view-stereo{display:none;flex-direction:column;height:100vh;background:#0b0d10;color:#d7dbe0;--bd:#23272e;--pn:#14171c;--dim:#838c96;font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Segoe UI",sans-serif;overflow:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#view-stereo *{box-sizing:border-box}
+#st-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--bd)}
+#st-top .t{font-size:13px;color:var(--dim);margin-right:4px}#st-top .t b{color:#d7dbe0}
+#view-stereo input[type=text]{background:var(--pn);border:1px solid var(--bd);color:#d7dbe0;border-radius:6px;padding:7px 9px;font:14px ui-monospace,Menlo,Consolas,monospace;width:170px}
+#view-stereo button{background:#2a2f37;border:1px solid #363c45;color:#d7dbe0;border-radius:6px;padding:7px 10px;font-size:12.5px;cursor:pointer}
+#view-stereo button:hover{background:#333944}
+#st-body{flex:1;min-height:0;display:flex}
+#st-cwrap{flex:1;min-width:0;position:relative}
+#st-canvas{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none;cursor:grab}
+#st-side{width:290px;border-left:1px solid var(--bd);padding:12px;overflow:auto;font-size:12.5px;color:var(--dim);display:flex;flex-direction:column;gap:10px}
+#st-side label{display:flex;align-items:center;gap:6px;color:#d7dbe0}
+#st-side .r{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+#st-side input[type=text]{width:110px}
+#st-side select{background:var(--pn);color:#d7dbe0;border:1px solid var(--bd);border-radius:6px;padding:4px}
+#st-info{background:var(--pn);border:1px solid var(--bd);border-radius:8px;padding:10px;font:13px/1.8 ui-monospace,Menlo,Consolas,monospace;color:#d7dbe0}
+@media(max-width:700px){#st-body{flex-direction:column}#st-side{width:auto;max-height:46%;border-left:none;border-top:1px solid var(--bd)}}
+</style>
+</head>
+<body>
+
+<div id="view-tool">
+  <div class="wrap">
+  
+<div class="wrap">
+
+  <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
+    <button type="button" onclick="showGlobeView()" style="background:var(--panel-2); color:var(--teal); border:1px solid var(--line); font-size:13px; padding:9px 16px;">🌐 極点球儀を単体で開く</button>
+  <button type="button" onclick="showStereoView()" style="margin-left:8px; background:var(--panel-2); color:var(--amber); border:1px solid var(--line); font-size:13px; padding:9px 16px;">◎ ステレオ投影図を開く</button>
+  </div>
+  <div class="kicker">CUBIC SYSTEM · X線ゴニオメトリー</div>
+  <h1>面間角度から指数を決める</h1>
+  <p class="lede">
+    3つの結晶面 A・B・C がつくる球面三角形の3辺の角度（測角器で測った面間角）を入力すると、
+    立方晶の余弦則を使って矛盾なく成立する指数 (hkl) の組を総当たりで探します。
+  </p>
+
+  <div class="hero">
+    <svg viewBox="0 0 640 300" width="100%" height="260">
+      <path class="tri-edge" d="M 320 40 L 110 250 L 530 250 Z"></path>
+
+      <circle class="tri-vertex" cx="320" cy="40" r="22"></circle>
+      <text x="320" y="47" text-anchor="middle" class="vlabel">A</text>
+
+      <circle class="tri-vertex" cx="110" cy="250" r="22"></circle>
+      <text x="110" y="257" text-anchor="middle" class="vlabel">B</text>
+
+      <circle class="tri-vertex" cx="530" cy="250" r="22"></circle>
+      <text x="530" y="257" text-anchor="middle" class="vlabel">C</text>
+
+      <text x="320" y="20" text-anchor="middle" class="vsub" id="aSub">100</text>
+      <text x="90" y="286" text-anchor="middle" class="vsub">既知面</text>
+      <text x="550" y="286" text-anchor="middle" class="vsub">既知面</text>
+
+      <text x="185" y="130" text-anchor="middle" class="elabel" id="eABLabel">φAB</text>
+      <text x="460" y="130" text-anchor="middle" class="elabel" id="eACLabel">φAC</text>
+      <text x="320" y="270" text-anchor="middle" class="elabel" id="eBCLabel">φBC</text>
+    </svg>
+  </div>
+
+  <div class="panel">
+    <h2>モード</h2>
+    <div class="row" style="align-items:center;">
+      <label style="display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--text); cursor:pointer;">
+        <input type="radio" name="mode" id="modeKnown" value="known" checked onchange="toggleMode()" style="width:auto;">
+        基準面 A は既知
+      </label>
+      <label style="display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--text); cursor:pointer;">
+        <input type="radio" name="mode" id="modeUnknown" value="unknown" onchange="toggleMode()" style="width:auto;">
+        3点とも指数不明（全探索）
+      </label>
+      <label style="display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--text); cursor:pointer;">
+        <input type="radio" name="mode" id="modePair" value="pair" onchange="toggleMode()" style="width:auto;">
+        2点とも指数不明・2点だけで調べる
+      </label>
+    </div>
+    <p style="color:var(--text-dim); font-size:13px; margin:10px 0 0;" id="modeNote">
+      A・B・Cのうち少なくとも1面の指数がすでにわかっている場合はこちら。探索が速く、解の絞り込みも安定します。
+    </p>
+  </div>
+
+  <div class="panel" id="knownPanel">
+    <h2>基準面 A（すでに指数がわかっている面）</h2>
+    <div class="row">
+      <div class="field">
+        <label>h</label>
+        <input type="number" id="aH" value="1" step="1">
+      </div>
+      <div class="field">
+        <label>k</label>
+        <input type="number" id="aK" value="0" step="1">
+      </div>
+      <div class="field">
+        <label>l</label>
+        <input type="number" id="aL" value="0" step="1">
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <h2 id="angTitle">3辺の実測角度（度）</h2>
+    <div class="row">
+      <div class="field">
+        <label>φAB（A–B間）</label>
+        <input type="number" id="angAB" step="0.01" placeholder="例: 45.00">
+      </div>
+      <div class="field">
+        <label>φAC（A–C間）</label>
+        <input type="number" id="angAC" step="0.01" placeholder="例: 54.74">
+      </div>
+      <div class="field" id="bcField">
+        <label>φBC（B–C間）</label>
+        <input type="number" id="angBC" step="0.01" placeholder="例: 35.26">
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <h2>探索条件</h2>
+    <div class="row">
+      <div class="field">
+        <label>許容誤差 (±度)</label>
+        <input type="number" id="tol" value="0.5" step="0.1" min="0.01">
+      </div>
+    </div>
+    <div class="row" style="align-items:center;">
+      <label style="display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--text); cursor:pointer;">
+        <input type="checkbox" id="stdOnly" checked onchange="toggleStdOnly()" style="width:auto;">
+        標準投影図の指数のみで探索する
+      </label>
+    </div>
+    <p style="color:var(--text-dim); font-size:12.5px; margin:6px 0 14px;" id="stdOnlyNote">
+      下の「探索範囲N」で指定した最大成分までの既約な代表指数（100, 110, 111, 210, 211, 221, …）と、
+      その対称的に等価な点（符号・並び替え違い）だけを候補にします。200のように約分できる指数（100と同じ向き）は除外されます。
+    </p>
+    <div class="row" id="customRangeRow">
+      <div class="field">
+        <label id="maxNLabel">指数の探索範囲（最大成分 ≤ N の既約な指数まで）</label>
+        <input type="number" id="maxN" value="4" step="1" min="1" max="8">
+      </div>
+    </div>
+    <div class="row" style="align-items:center;">
+      <label style="display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text-dim); cursor:pointer;">
+        <input type="checkbox" id="posOnly" style="width:auto;">
+        指数を非負（h,k,l ≥ 0）に限定する（通常はOFFのままにしてください）
+      </label>
+    </div>
+    <p style="color:var(--text-dim); font-size:12.5px; margin:6px 0 0;">
+      ステレオ投影の3点法では、同じ{hkl}族の異なるメンバー（例：[111]と[1,1,−1]）が別々の点として現れるため、
+      符号付きの指数が必要になるのが普通です。このチェックは、3点が明らかに同じ象限にあると分かっている場合のみ使ってください。
+      通常のNは4程度で十分（既存の表と同じ範囲）です。
+    </p>
+    <div class="row">
+      <div class="field" style="display:flex; align-items:flex-end;">
+        <button onclick="solve()">指数を探索する</button>
+      </div>
+    </div>
+
+    <div class="formula" id="formulaText"></div>
+  </div>
+
+  <div id="resultsPanel" class="panel" style="display:none;">
+    <h2>候補一覧</h2>
+    <div class="status" id="statusLine"></div>
+    <div id="resultsBody"></div>
+  </div>
+
+  <p class="note">
+    立方晶では、2つの方向 (h₁k₁l₁)・(h₂k₂l₂) のなす角 φ は
+    cos φ = (h₁h₂＋k₁k₂＋l₁l₂) / [√(h₁²＋k₁²＋l₁²) · √(h₂²＋k₂²＋l₂²)] で与えられます。
+    ステレオ投影を使う3点法では、同じ{hkl}族の異なるメンバー（例：[111]と[1,1,−1]の間は約70.5°）が
+    投影図上の別々の点として現れるため、符号付きの指数を含めて探索するのが基本です。
+    この式を3辺すべてに同時に適用し、φAB・φAC・φBCそれぞれが指定した許容誤差以内かどうかを個別に判定します（3辺の合計ではありません）。
+    条件を満たす組を、3辺のうち最大誤差が小さい順に表示します。
+    同じ三角形に対して立方晶の対称操作で移り合う等価な複数解が現れることがあるので、
+    既知の軸やX線写真の対称性と見比べて実際の方位に合う1組を選んでください。
+  </p>
+
+</div>
+
+  <p style="text-align:right; font-size:11px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; margin-top:28px;">build: 3点連結検索 v2</p>
+
+  </div>
+</div>
+
+<div id="view-globe">
+
+<div id="app">
+  <div id="canvas-wrap"></div>
+
+  <div id="topbar">
+    <div id="title">立方晶<br><b>極点球儀</b></div>
+    <div id="searchwrap">
+      <div id="searchbox">
+        <input id="search-input" type="text" placeholder="例: 111 ／ 1-11 ／ 100;010;111" inputmode="text">
+        <button id="search-btn">検索</button>
+      </div>
+      <div id="search-hint">複数点は「;」区切りで最大3点 (角度・線分も表示)</div>
+      <div id="search-msg"></div>
+    </div>
+    <button id="back-to-tool-btn" type="button" onclick="showToolView()" style="background:#2a2f37; border-color:#3fb6ac; color:#eaf7f5;">← 指数決定ツールへ戻る</button>
+    <button id="reset-btn">向き初期化</button>
+    <button type="button" onclick="showStereoView()" style="background:#2a2f37; border-color:#e3a13d; color:#eaf7f5;">◎ ステレオ投影図</button>
+  </div>
+
+  <div id="legend">
+    <div class="row"><span class="sw" style="background:var(--accent-100)"></span>{001} キューブ極</div>
+    <div class="row"><span class="sw" style="background:var(--accent-110)"></span>{011} 菱面極</div>
+    <div class="row"><span class="sw" style="background:var(--accent-111)"></span>{111} 八面極</div>
+    <div class="row"><span class="sw" style="background:var(--dot)"></span>その他 (hkl)</div>
+  </div>
+
+  <div id="info" class="empty">
+    <div class="idx">点をタップ、または検索</div>
+    <div class="sub">&nbsp;</div>
+  </div>
+
+  <div id="help">
+    ドラッグ(指1本)で自由回転 ・ ホイール/ピンチで拡大縮小<br>
+    さらに拡大すると球の内側に入り、反対側の指数も透けて見えます<br>
+    タップすると周辺の指数も表示<br>
+    <b>[001] [011] [111]</b> は明るい極として強調表示
+  </div>
+
+  <div id="tooltip"></div>
+  <div id="inside-badge">内側表示中 ー 反対側の指数も見えています</div>
+</div>
+
+</div>
+
+<div id="view-stereo">
+  <div id="st-top">
+    <div class="t">立方晶<b> ステレオ投影図</b></div>
+    <input id="st-search" type="text" placeholder="例: 001;-1-13;-101" autocomplete="off">
+    <button id="st-go">検索</button>
+    <button id="st-ex">例を入れる</button>
+    <button type="button" onclick="showToolView()">← 指数決定ツール</button>
+    <button type="button" onclick="showGlobeView()">🌐 極点球儀</button>
+    <span id="st-msg" style="font-size:12px;color:#838c96"></span>
+  </div>
+  <div id="st-body">
+    <div id="st-cwrap"><canvas id="st-canvas"></canvas></div>
+    <div id="st-side">
+      <div>中心(光軸)にする軸 [hkl]<div class="r"><input id="st-center" type="text" value="001"><button id="st-setc">中心にする</button></div></div>
+      <div>面内回転 ψ <span id="st-psiv">0°</span><br><input id="st-psi" type="range" min="-180" max="180" step="0.5" value="0" style="width:100%"></div>
+      <div>拡大 <input id="st-zoom" type="range" min="1" max="6" step="0.1" value="1" style="width:70%"></div>
+      <div class="r">最大指数 N <select id="st-n"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>
+      <label><input type="checkbox" id="st-in" checked> 結晶側から見る(ラウエ写真と同じ向き)</label>
+      <label><input type="checkbox" id="st-lab"> 指数ラベルを全部表示</label>
+      <div class="r"><button id="st-reset">向き初期化</button><button id="st-clr">点を消す</button></div>
+      <div id="st-info"></div>
+      <div style="line-height:1.6">ドラッグで結晶を回転、ホイールで拡大。点をクリックすると最大3点まで選べ、光軸からの角度と点どうしの角度を表示します。結晶側から見ると、外側から見た図とは左右が反転します。</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ---------------------------------------------------------------------
+// ビュー切り替え（面指数決定ツール ⇔ 極点球儀）
+// ---------------------------------------------------------------------
+function showGlobeView(prefillQuery){
+  document.getElementById('view-tool').style.display = 'none';
+  document.getElementById('view-stereo').style.display = 'none';
+  var gv = document.getElementById('view-globe');
+  gv.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  window.scrollTo(0,0);
+
+  if(!window.CrystalGlobe){
+    window.__initCrystalGlobe();
+  }
+  window.CrystalGlobe.resize();
+
+  if(prefillQuery){
+    window.CrystalGlobe.runSearchWith(prefillQuery);
+  }
+}
+
+function showToolView(){
+  document.getElementById('view-globe').style.display = 'none';
+  document.getElementById('view-stereo').style.display = 'none';
+  document.getElementById('view-tool').style.display = 'block';
+  document.body.style.overflow = '';
+}
+
+function showStereoView(q){
+  document.getElementById('view-tool').style.display='none';
+  document.getElementById('view-globe').style.display='none';
+  document.getElementById('view-stereo').style.display='flex';
+  document.body.style.overflow='hidden'; window.scrollTo(0,0);
+  if(window.__stResize) window.__stResize();
+  if(q && window.__stRun) window.__stRun(q);
+}
+
+function viewIndexInGlobe(idxStr){
+  showGlobeView(idxStr);
+}
+</script>
+<script>
+
+document.getElementById('formulaText').textContent =
+  'cos φ = (h1h2 + k1k2 + l1l2) / [ √(h1²+k1²+l1²) · √(h2²+k2²+l2²) ]';
+
+function toggleMode(){
+  const mode = document.querySelector('input[name="mode"]:checked').value;
+  const unknown = mode === 'unknown';
+  const pair = mode === 'pair';
+  const aFields = document.getElementById('aH').closest('.row');
+  const divider = aFields.nextElementSibling; // hr after A fields
+  const hideA = unknown || pair;
+  aFields.style.display = hideA ? 'none' : 'flex';
+  if (divider && divider.classList.contains('divider')) divider.style.display = hideA ? 'none' : 'block';
+
+  // 入力欄の出し分け（2点モード: φAC と φBC を隠す）
+  document.getElementById('bcField').style.display = pair ? 'none' : '';
+  document.getElementById('angAC').closest('.field').style.display = pair ? 'none' : '';
+  document.getElementById('angAB').closest('.field').querySelector('label').textContent =
+    pair ? 'φ（点1–点2間）' : 'φAB（A–B間）';
+  document.getElementById('angTitle').textContent =
+    pair ? '実測角度（度）' : '3辺の実測角度（度）';
+
+  const eAB = document.getElementById('eABLabel');
+  const eAC = document.getElementById('eACLabel');
+  const eBC = document.getElementById('eBCLabel');
+  eAB.textContent = pair ? 'φ' : 'φAB';
+  eAC.style.opacity = pair ? '0.4' : '1';
+  eBC.textContent = pair ? 'φBC（未測定）' : 'φBC';
+  eBC.style.opacity = pair ? '0.4' : '1';
+
+  const maxNField = document.getElementById('maxN');
+  // Only auto-adjust if the user hasn't already typed a custom value for this mode.
+  if (!maxNField.dataset.userEdited){
+    maxNField.value = unknown ? '2' : '4';
+  }
+
+  const notes = {
+    known: 'A・B・Cのうち少なくとも1面の指数がすでにわかっている場合はこちら。探索が速く、解の絞り込みも安定します。',
+    unknown: '最初の1点目〜3点目を決めるときはこちら。投影図の中心付近は対称性の良い低次指数の軸が集まりやすいので、まずは N=2 程度・小さめの三角形から探すのが安全です。指数が決まったら「既知」モードに切り替えて外側へ広げてください。',
+    pair: 'どちらの面も指数がわからず、2点間の角度 φ を1つだけ測った場合はこちら。立方晶の対称性により、点1を代表的な指数（h ≥ k ≥ l ≥ 0）に固定しても一般性を失わないので、その点1に対して φ を満たす点2を全て列挙します。点1を他の等価な指数に置き換えたい場合は、対称操作（符号の反転・成分の入れ替え）を点2にも同時に施してください。'
+  };
+  document.getElementById('modeNote').textContent = notes[mode];
+}
+document.getElementById('maxN').addEventListener('input', function(){ this.dataset.userEdited = '1'; });
+
+function updateASub(){
+  const h = document.getElementById('aH').value;
+  const k = document.getElementById('aK').value;
+  const l = document.getElementById('aL').value;
+  document.getElementById('aSub').textContent = h + k + l;
+}
+['aH','aK','aL'].forEach(id => document.getElementById(id).addEventListener('input', updateASub));
+
+function normSq(v){ return v[0]*v[0] + v[1]*v[1] + v[2]*v[2]; }
+
+function angleBetween(v1, v2){
+  const dot = v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
+  const n1 = Math.sqrt(v1[0]*v1[0]+v1[1]*v1[1]+v1[2]*v1[2]);
+  const n2 = Math.sqrt(v2[0]*v2[0]+v2[1]*v2[1]+v2[2]*v2[2]);
+  let c = dot/(n1*n2);
+  c = Math.max(-1, Math.min(1, c));
+  return Math.acos(c) * 180 / Math.PI;
+}
+
+function fmt(v){
+  return (v[0]<0?'\u0305'+Math.abs(v[0]):v[0]) + '' +
+         (v[1]<0?'\u0305'+Math.abs(v[1]):v[1]) + '' +
+         (v[2]<0?'\u0305'+Math.abs(v[2]):v[2]);
+}
+function plain(v){ return v.join(' '); }
+
+function errClass(e, tol){
+  if (e <= tol*0.4) return 'err-good';
+  if (e <= tol*0.8) return 'err-mid';
+  return 'err-bad';
+}
+
+function gcd2(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a; }
+function gcd3(a,b,c){ return gcd2(gcd2(a,b),c); }
+
+function permutations3(arr){
+  const [a,b,c] = arr;
+  const raw = [
+    [a,b,c],[a,c,b],[b,a,c],[b,c,a],[c,a,b],[c,b,a]
+  ];
+  const seen = new Set();
+  const out = [];
+  for(const p of raw){
+    const key = p.join(',');
+    if (!seen.has(key)){ seen.add(key); out.push(p); }
+  }
+  return out;
+}
+
+function expandFamily(h,k,l){
+  const perms = permutations3([h,k,l]);
+  const seen = new Set();
+  const out = [];
+  for(const p of perms){
+    const signsPerComp = p.map(v => v === 0 ? [0] : [v, -v]);
+    for(const sh of signsPerComp[0]){
+      for(const sk of signsPerComp[1]){
+        for(const sl of signsPerComp[2]){
+          const key = sh+','+sk+','+sl;
+          if (!seen.has(key)){ seen.add(key); out.push([sh,sk,sl]); }
+        }
+      }
+    }
+  }
+  return out;
+}
+
+// Generate the canonical (reduced, h>=k>=l>=0) low-index forms with max component <= N,
+// then expand each into its full set of symmetry-equivalent points (signs + orderings).
+// This is what a standard cubic stereographic projection plots up to index N.
+function standardVecsForN(N){
+  const canon = [];
+  for(let h=1; h<=N; h++){
+    for(let k=0; k<=h; k++){
+      for(let l=0; l<=k; l++){
+        if (gcd3(h,k,l) !== 1) continue; // skip non-reduced (e.g. 200 -> same direction as 100)
+        canon.push([h,k,l]);
+      }
+    }
+  }
+  const seen = new Set();
+  const out = [];
+  for(const [h,k,l] of canon){
+    for(const v of expandFamily(h,k,l)){
+      const key = v.join(',');
+      if (!seen.has(key)){ seen.add(key); out.push(v); }
+    }
+  }
+  return out;
+}
+
+function toggleStdOnly(){
+  const std = document.getElementById('stdOnly').checked;
+  document.getElementById('stdOnlyNote').style.display = std ? 'block' : 'none';
+  document.getElementById('maxNLabel').textContent = std
+    ? '指数の探索範囲（最大成分 ≤ N の既約な指数まで）'
+    : '指数の探索範囲（−N〜N）';
+}
+
+function buildVecs(N){
+  let vecs;
+  if (document.getElementById('stdOnly').checked){
+    vecs = standardVecsForN(N);
+  } else {
+    vecs = [];
+    for(let h=-N; h<=N; h++){
+      for(let k=-N; k<=N; k++){
+        for(let l=-N; l<=N; l++){
+          if (h===0 && k===0 && l===0) continue;
+          vecs.push([h,k,l]);
+        }
+      }
+    }
+  }
+  if (document.getElementById('posOnly').checked){
+    vecs = vecs.filter(v => v[0]>=0 && v[1]>=0 && v[2]>=0);
+  }
+  return vecs;
+}
+
+function solveKnown(angAB, angAC, angBC, tol, N, statusLine, body){
+  const A = [
+    parseInt(document.getElementById('aH').value)||0,
+    parseInt(document.getElementById('aK').value)||0,
+    parseInt(document.getElementById('aL').value)||0
+  ];
+  if (A[0]===0 && A[1]===0 && A[2]===0){
+    statusLine.textContent = '基準面 A の指数を (0 0 0) 以外で入力してください。';
+    body.innerHTML = '';
+    return;
+  }
+
+  const vecs = buildVecs(N);
+
+  const bCandidates = [];
+  for(const v of vecs){
+    const e = Math.abs(angleBetween(A, v) - angAB);
+    if (e <= tol) bCandidates.push({v, e});
+  }
+
+  const solutions = [];
+  for(const bc of bCandidates){
+    const B = bc.v;
+    for(const v of vecs){
+      const eAC = Math.abs(angleBetween(A, v) - angAC);
+      if (eAC > tol) continue;
+      const eBC = Math.abs(angleBetween(B, v) - angBC);
+      if (eBC > tol) continue;
+      solutions.push({ A, B, C: v, eAB: bc.e, eAC, eBC, maxErr: Math.max(bc.e, eAC, eBC), mag: normSq(B) + normSq(v) });
+    }
+  }
+
+  solutions.sort((x,y)=> (x.mag - y.mag) || (x.maxErr - y.maxErr));
+
+  if (solutions.length === 0){
+    statusLine.textContent = '一致する組み合わせが見つかりませんでした。許容誤差を広げるか、探索範囲 N を大きくしてください。';
+    body.innerHTML = '';
+    return;
+  }
+
+  const shown = solutions.slice(0, 80);
+  statusLine.textContent =
+    `${solutions.length} 件の候補が見つかりました（各辺は個別に許容誤差 ±${tol}° 以内。指数の小さい順、同じ大きさなら誤差の小さい順に上位 ${shown.length} 件を表示）。`;
+
+  let html = '<table><thead><tr>' +
+    '<th>面 B (hkl) 🔍</th><th>面 C (hkl) 🔍</th><th>球儀</th>' +
+    '<th>計算φAB</th><th>誤差</th>' +
+    '<th>計算φAC</th><th>誤差</th>' +
+    '<th>計算φBC</th><th>誤差</th>' +
+    '</tr></thead><tbody>';
+
+  for(const s of shown){
+    const calcAB = angleBetween(A, s.B);
+    const calcAC = angleBetween(A, s.C);
+    const calcBC = angleBetween(s.B, s.C);
+    const triGroup = `${plain(A)};${plain(s.B)};${plain(s.C)}`;
+    html += '<tr>' +
+      `<td class="hkl"><a href="javascript:void(0)" class="hkl-link" onclick="viewIndexInGlobe('${plain(s.B)}')">${plain(s.B)}</a></td>` +
+      `<td class="hkl"><a href="javascript:void(0)" class="hkl-link" onclick="viewIndexInGlobe('${plain(s.C)}')">${plain(s.C)}</a></td>` +
+      `<td><button type="button" class="globe-btn" onclick="viewIndexInGlobe('${triGroup}')" title="A・B・C の3点をまとめて球儀に表示">🌐 3点</button></td>` +
+      `<td>${calcAB.toFixed(2)}°</td><td class="${errClass(s.eAB,tol)}">${s.eAB.toFixed(2)}°</td>` +
+      `<td>${calcAC.toFixed(2)}°</td><td class="${errClass(s.eAC,tol)}">${s.eAC.toFixed(2)}°</td>` +
+      `<td>${calcBC.toFixed(2)}°</td><td class="${errClass(s.eBC,tol)}">${s.eBC.toFixed(2)}°</td>` +
+      '</tr>';
+  }
+  html += '</tbody></table>';
+  body.innerHTML = html;
+}
+
+function solvePair(phi, tol, N, statusLine, body){
+  // 点1: 代表指数（既約・h>=k>=l>=0）に固定。立方晶の対称操作で全ての点1はこれに移せる。
+  const canon = [];
+  for(let h=1; h<=N; h++){
+    for(let k=0; k<=h; k++){
+      for(let l=0; l<=k; l++){
+        if (gcd3(h,k,l) !== 1) continue;
+        canon.push([h,k,l]);
+      }
+    }
+  }
+  // 点2: 既約な指数のみ（約分できる指数は同じ向きの重複になるため除外）
+  const vecs = buildVecs(N).filter(v => gcd3(v[0],v[1],v[2]) === 1);
+
+  const fam = v => v.map(Math.abs).sort((a,b)=>b-a).join('');
+
+  const solutions = [];
+  for(const P1 of canon){
+    for(const P2 of vecs){
+      if (P1[0]===P2[0] && P1[1]===P2[1] && P1[2]===P2[2]) continue;
+      const a = angleBetween(P1, P2);
+      const e = Math.abs(a - phi);
+      if (e > tol) continue;
+      solutions.push({P1, P2, calc: a, e, mag: normSq(P1)+normSq(P2)});
+    }
+  }
+  solutions.sort((x,y)=> (x.mag - y.mag) || (x.e - y.e));
+
+  if (solutions.length === 0){
+    statusLine.textContent = '一致する組み合わせが見つかりませんでした。許容誤差を広げるか、探索範囲 N を大きくしてください。';
+    body.innerHTML = '';
+    return;
+  }
+
+  const shown = solutions.slice(0, 100);
+  statusLine.textContent =
+    `${solutions.length} 件の候補が見つかりました（許容誤差 ±${tol}° 以内。点1は代表指数に固定。指数の小さい順、同じ大きさなら誤差の小さい順に上位 ${shown.length} 件を表示）。` +
+    ' 2点だけでは方位は1つに定まらず、φ が同じになる指数の組が多数存在します。3点目の角度を測るか、既知の軸との関係から絞り込んでください。';
+
+  let html = '<table><thead><tr>' +
+    '<th>点1 (hkl) 🔍</th><th>点2 (hkl) 🔍</th><th>族</th><th>球儀</th>' +
+    '<th>計算φ</th><th>誤差</th>' +
+    '</tr></thead><tbody>';
+  for(const s of shown){
+    const pairStr = `${plain(s.P1)};${plain(s.P2)}`;
+    html += '<tr>' +
+      `<td class="hkl"><a href="javascript:void(0)" class="hkl-link" onclick="viewIndexInGlobe('${plain(s.P1)}')">${plain(s.P1)}</a></td>` +
+      `<td class="hkl"><a href="javascript:void(0)" class="hkl-link" onclick="viewIndexInGlobe('${plain(s.P2)}')">${plain(s.P2)}</a></td>` +
+      `<td>{${fam(s.P1)}}–{${fam(s.P2)}}</td>` +
+      `<td><button type="button" class="globe-btn" onclick="viewIndexInGlobe('${pairStr}')" title="点1・点2をまとめて球儀に表示">🌐 2点</button></td>` +
+      `<td>${s.calc.toFixed(2)}°</td><td class="${errClass(s.e,tol)}">${s.e.toFixed(2)}°</td>` +
+      '</tr>';
+  }
+  html += '</tbody></table>';
+  body.innerHTML = html;
+}
+
+function solveUnknown(angAB, angAC, angBC, tol, N, statusLine, body){
+  const capN = Math.min(N, 6); // keep the fully-blind search tractable
+  const vecs = buildVecs(capN);
+
+  const solutions = [];
+  for(const V1 of vecs){
+    // quick pre-filter: V2 candidates matching angle(V1,V2)=angAB
+    const v2list = [];
+    for(const V2 of vecs){
+      const e1 = Math.abs(angleBetween(V1, V2) - angAB);
+      if (e1 <= tol) v2list.push({V2, e1});
+    }
+    if (v2list.length === 0) continue;
+
+    for(const v3 of vecs){
+      const e2 = Math.abs(angleBetween(V1, v3) - angAC);
+      if (e2 > tol) continue;
+      for(const cand of v2list){
+        const e3 = Math.abs(angleBetween(cand.V2, v3) - angBC);
+        if (e3 > tol) continue;
+        solutions.push({
+          A: V1, B: cand.V2, C: v3,
+          eAB: cand.e1, eAC: e2, eBC: e3,
+          maxErr: Math.max(cand.e1, e2, e3),
+          mag: normSq(V1) + normSq(cand.V2) + normSq(v3)
+        });
+      }
+    }
+  }
+
+  solutions.sort((x,y)=> (x.mag - y.mag) || (x.maxErr - y.maxErr));
+
+  if (solutions.length === 0){
+    statusLine.textContent = '一致する組み合わせが見つかりませんでした。許容誤差を広げるか、探索範囲 N を大きくしてください。';
+    body.innerHTML = '';
+    return;
+  }
+
+  const shown = solutions.slice(0, 80);
+  statusLine.textContent =
+    `${solutions.length} 件の候補が見つかりました（各辺は個別に許容誤差 ±${tol}° 以内。指数の小さい順、同じ大きさなら誤差の小さい順に上位 ${shown.length} 件を表示）。` +
+    ' 3点とも未知の全探索では、立方晶の対称操作で互いに移り合う「向きだけ違う」等価解が複数現れます。' +
+    '既に指数がわかっている別の面（結晶軸など）と見比べて、実際の方位に合う1組を選んでください。';
+
+  let html = '<table><thead><tr>' +
+    '<th>点1 (hkl) 🔍</th><th>点2 (hkl) 🔍</th><th>点3 (hkl) 🔍</th><th>球儀</th>' +
+    '<th>計算φ12</th><th>誤差</th>' +
+    '<th>計算φ13</th><th>誤差</th>' +
+    '<th>計算φ23</th><th>誤差</th>' +
+    '</tr></thead><tbody>';
+
+  for(const s of shown){
+    const calcAB = angleBetween(s.A, s.B);
+    const calcAC = angleBetween(s.A, s.C);
+    const calcBC = angleBetween(s.B, s.C);
+    const triGroup = `${plain(s.A)};${plain(s.B)};${plain(s.C)}`;
+    html += '<tr>' +
+      `<td class="hkl"><a href="javascript:void(0)" class="hkl-link" onclick="viewIndexInGlobe('${plain(s.A)}')">${plain(s.A)}</a></td>` +
+      `<td class="hkl"><a href="javascript:void(0)" class="hkl-link" onclick="viewIndexInGlobe('${plain(s.B)}')">${plain(s.B)}</a></td>` +
+      `<td class="hkl"><a href="javascript:void(0)" class="hkl-link" onclick="viewIndexInGlobe('${plain(s.C)}')">${plain(s.C)}</a></td>` +
+      `<td><button type="button" class="globe-btn" onclick="viewIndexInGlobe('${triGroup}')" title="点1・2・3をまとめて球儀に表示">🌐 3点</button></td>` +
+      `<td>${calcAB.toFixed(2)}°</td><td class="${errClass(s.eAB,tol)}">${s.eAB.toFixed(2)}°</td>` +
+      `<td>${calcAC.toFixed(2)}°</td><td class="${errClass(s.eAC,tol)}">${s.eAC.toFixed(2)}°</td>` +
+      `<td>${calcBC.toFixed(2)}°</td><td class="${errClass(s.eBC,tol)}">${s.eBC.toFixed(2)}°</td>` +
+      '</tr>';
+  }
+  html += '</tbody></table>';
+  body.innerHTML = html;
+}
+
+function solve(){
+  const angAB = parseFloat(document.getElementById('angAB').value);
+  const angAC = parseFloat(document.getElementById('angAC').value);
+  const angBC = parseFloat(document.getElementById('angBC').value);
+  const tol = parseFloat(document.getElementById('tol').value) || 0.5;
+  const N = Math.min(8, Math.max(1, parseInt(document.getElementById('maxN').value) || 4));
+
+  const resultsPanel = document.getElementById('resultsPanel');
+  const statusLine = document.getElementById('statusLine');
+  const body = document.getElementById('resultsBody');
+  resultsPanel.style.display = 'block';
+
+  if (document.getElementById('modePair').checked){
+    if (isNaN(angAB)){
+      statusLine.textContent = '2点間の角度 φ を入力してください。';
+      body.innerHTML = '';
+      return;
+    }
+    solvePair(angAB, tol, N, statusLine, body);
+    return;
+  }
+
+  if (isNaN(angAB) || isNaN(angAC) || isNaN(angBC)){
+    statusLine.textContent = '3つの角度をすべて入力してください。';
+    body.innerHTML = '';
+    return;
+  }
+
+  if (document.getElementById('modeUnknown').checked){
+    statusLine.textContent = '探索中…（3点未知モードは少し時間がかかることがあります）';
+    body.innerHTML = '';
+    setTimeout(()=> solveUnknown(angAB, angAC, angBC, tol, N, statusLine, body), 30);
+  } else {
+    solveKnown(angAB, angAC, angBC, tol, N, statusLine, body);
+  }
+}
+
+</script>
+<script>
+window.__initCrystalGlobe = function(){
+
+  "use strict";
+
+  // ---------------------------------------------------------------------
+  // Math helpers: Miller-index family generation
+  // ---------------------------------------------------------------------
+  function gcd2(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ [a,b]=[b, a%b]; } return a; }
+  function gcd3(a,b,c){ return gcd2(gcd2(a,b),c); }
+
+  function uniquePermutations(arr){
+    const seen = new Set(); const out = [];
+    const a = arr.slice();
+    function permute(l){
+      if(l === a.length){
+        const key = a.join(',');
+        if(!seen.has(key)){ seen.add(key); out.push(a.slice()); }
+        return;
+      }
+      for(let i=l;i<a.length;i++){
+        [a[l],a[i]] = [a[i],a[l]];
+        permute(l+1);
+        [a[l],a[i]] = [a[i],a[l]];
+      }
+    }
+    permute(0);
+    return out;
+  }
+
+  function generateFamily(base){
+    const perms = uniquePermutations(base);
+    const seen = new Set(); const out = [];
+    for(const p of perms){
+      const options = p.map(v => v === 0 ? [0] : [v, -v]);
+      (function cart(idx, cur){
+        if(idx === options.length){
+          const key = cur.join(',');
+          if(!seen.has(key)){ seen.add(key); out.push(cur.slice()); }
+          return;
+        }
+        for(const v of options[idx]){ cur.push(v); cart(idx+1, cur); cur.pop(); }
+      })(0, []);
+    }
+    return out;
+  }
+
+  const FAMILY_100 = generateFamily([1,0,0]);
+  const FAMILY_110 = generateFamily([1,1,0]);
+  const FAMILY_111 = generateFamily([1,1,1]);
+
+  const primaryKeySet = new Set(
+    [...FAMILY_100, ...FAMILY_110, ...FAMILY_111].map(p => p.join(','))
+  );
+
+  const MAX_INDEX = 4;
+  const secondaryPoints = [];
+  for(let h=-MAX_INDEX; h<=MAX_INDEX; h++){
+    for(let k=-MAX_INDEX; k<=MAX_INDEX; k++){
+      for(let l=-MAX_INDEX; l<=MAX_INDEX; l++){
+        if(h===0 && k===0 && l===0) continue;
+        if(gcd3(h,k,l) !== 1) continue;
+        const key = [h,k,l].join(',');
+        if(primaryKeySet.has(key)) continue;
+        secondaryPoints.push([h,k,l]);
+      }
+    }
+  }
+
+  function toVec3(p){
+    const len = Math.hypot(p[0], p[1], p[2]);
+    return new THREE.Vector3(p[0]/len, p[2]/len, p[1]/len);
+  }
+
+  function formatIndex(n){
+    return n < 0 ? (Math.abs(n) + '\u0305') : String(n);
+  }
+  function formatTriple(p){
+    return p.map(formatIndex).join('');
+  }
+  function reduceTriple(p){
+    const g = gcd3(p[0],p[1],p[2]);
+    if(g === 0) return null;
+    return [p[0]/g, p[1]/g, p[2]/g];
+  }
+
+  // ---------------------------------------------------------------------
+  // Three.js scene
+  // ---------------------------------------------------------------------
+  const wrap = document.getElementById('canvas-wrap');
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0b0d10);
+
+  const camera = new THREE.PerspectiveCamera(42, wrap.clientWidth/wrap.clientHeight, 0.1, 100);
+  const renderer = new THREE.WebGLRenderer({ antialias:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+  wrap.appendChild(renderer.domElement);
+
+  // everything visible & rotatable lives in worldGroup; camera itself stays fixed,
+  // which lets us spin worldGroup freely with quaternions (no gimbal lock, no clamping).
+  const worldGroup = new THREE.Group();
+  scene.add(worldGroup);
+
+  const globeGeo = new THREE.SphereGeometry(0.965, 48, 32);
+  const globeMat = new THREE.MeshBasicMaterial({ color: 0x1c2733, transparent:true, opacity:0.92 });
+  const globe = new THREE.Mesh(globeGeo, globeMat);
+  worldGroup.add(globe);
+
+  const gridGeo = new THREE.SphereGeometry(0.97, 24, 16);
+  const gridWire = new THREE.LineSegments(
+    new THREE.WireframeGeometry(gridGeo),
+    new THREE.LineBasicMaterial({ color: 0x33414f, transparent:true, opacity:0.5 })
+  );
+  worldGroup.add(gridWire);
+
+  function greatCircle(axis){
+    const pts = [];
+    for(let i=0;i<=128;i++){
+      const t = (i/128) * Math.PI * 2;
+      let p;
+      if(axis === 'x') p = new THREE.Vector3(0, Math.cos(t), Math.sin(t));
+      else if(axis === 'z') p = new THREE.Vector3(Math.cos(t), Math.sin(t), 0);
+      else p = new THREE.Vector3(Math.cos(t), 0, Math.sin(t));
+      p.multiplyScalar(0.972);
+      pts.push(p);
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    return new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x4a5b6d, transparent:true, opacity:0.8 }));
+  }
+  worldGroup.add(greatCircle('y'));
+  worldGroup.add(greatCircle('x'));
+  worldGroup.add(greatCircle('z'));
+
+  const pointsGroup = new THREE.Group();
+  worldGroup.add(pointsGroup);
+
+  const secDotGeo = new THREE.SphereGeometry(0.016, 8, 8);
+  const secDotMat = new THREE.MeshBasicMaterial({ color: 0x7c8794 });
+  const secMesh = new THREE.InstancedMesh(secDotGeo, secDotMat, secondaryPoints.length);
+  const _m4 = new THREE.Matrix4();
+  const secVecs = [];
+  for(let i=0;i<secondaryPoints.length;i++){
+    const v = toVec3(secondaryPoints[i]);
+    secVecs.push(v);
+    _m4.makeTranslation(v.x, v.y, v.z);
+    secMesh.setMatrixAt(i, _m4);
+  }
+  secMesh.instanceMatrix.needsUpdate = true;
+  pointsGroup.add(secMesh);
+
+  const PRIMARY_STYLE = {
+    100: { color: 0xe3a13d, size: 0.040 },
+    110: { color: 0x3fb6ac, size: 0.032 },
+    111: { color: 0xd9585a, size: 0.036 },
+  };
+  const primaryMeshes = [];
+  function glowTexture(hexColor){
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const ctx = c.getContext('2d');
+    const col = new THREE.Color(hexColor);
+    const rgb = `${Math.round(col.r*255)},${Math.round(col.g*255)},${Math.round(col.b*255)}`;
+    const grad = ctx.createRadialGradient(32,32,0,32,32,32);
+    grad.addColorStop(0, `rgba(${rgb},0.9)`);
+    grad.addColorStop(1, `rgba(${rgb},0)`);
+    ctx.fillStyle = grad; ctx.fillRect(0,0,64,64);
+    return new THREE.CanvasTexture(c);
+  }
+  function addPrimaryFamily(list, familyName){
+    const style = PRIMARY_STYLE[familyName];
+    const geo = new THREE.SphereGeometry(style.size, 16, 12);
+    const mat = new THREE.MeshBasicMaterial({ color: style.color });
+    for(const p of list){
+      const v = toVec3(p);
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.copy(v);
+      pointsGroup.add(mesh);
+      primaryMeshes.push({ mesh, index:p, vec:v, family:familyName });
+
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: glowTexture(style.color), transparent:true, depthWrite:false, opacity:0.55
+      }));
+      glow.scale.set(style.size*7, style.size*7, 1);
+      glow.position.copy(v);
+      pointsGroup.add(glow);
+    }
+  }
+  addPrimaryFamily(FAMILY_100, 100);
+  addPrimaryFamily(FAMILY_110, 110);
+  addPrimaryFamily(FAMILY_111, 111);
+
+  function makeLabelSprite(triple, opts){
+    opts = opts || {};
+    const digits = triple.map(n => String(Math.abs(n)));
+    const negFlags = triple.map(n => n < 0);
+    const text = digits.join('');
+
+    const c = document.createElement('canvas');
+    const scale = 4;
+    c.width = 160*scale; c.height = 48*scale;
+    const ctx = c.getContext('2d');
+    ctx.scale(scale,scale);
+    const fontSize = opts.small ? 20 : 22;
+    ctx.font = `600 ${fontSize}px "SFMono-Regular", Menlo, Consolas, monospace`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+
+    const charWidth = ctx.measureText('0').width; // monospace, so every digit is the same width
+    const totalWidth = charWidth * text.length;
+    const startX = 80 - totalWidth/2;
+    const baselineY = 27;
+    const color = opts.color || '#eef1f4';
+    const shadow = '#0b0d10cc';
+    const barGap = fontSize * 0.16;
+    const barHeight = Math.max(1.4, fontSize * 0.09);
+
+    for(let i=0;i<text.length;i++){
+      const ch = text[i];
+      const x = startX + i*charWidth;
+
+      // measure this exact glyph's true top edge so the overline sits right
+      // above the numeral itself, not at a fixed offset (which is what
+      // caused the bar to drift out of place at different sizes).
+      const m = ctx.measureText(ch);
+      const glyphTop = baselineY - (m.actualBoundingBoxAscent || fontSize*0.72);
+
+      ctx.fillStyle = shadow;
+      ctx.fillText(ch, x+1, baselineY+1);
+      ctx.fillStyle = color;
+      ctx.fillText(ch, x, baselineY);
+
+      if(negFlags[i]){
+        const barY = glyphTop - barGap;
+        ctx.fillStyle = shadow;
+        ctx.fillRect(x+1, barY+1, charWidth, barHeight);
+        ctx.fillStyle = color;
+        ctx.fillRect(x, barY, charWidth, barHeight);
+      }
+    }
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.minFilter = THREE.LinearFilter;
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent:true, depthTest:false });
+    const spr = new THREE.Sprite(mat);
+    const s = opts.small ? 0.195 : 0.22;
+    spr.scale.set(s, s*0.3, 1);
+    spr.renderOrder = 999;
+    return spr;
+  }
+  const primaryLabelMap = new Map(); // "h,k,l" -> label sprite, so we can hide it when highlighted
+  for(const item of primaryMeshes){
+    const label = makeLabelSprite(item.index);
+    label.position.copy(item.vec).multiplyScalar(1.13);
+    pointsGroup.add(label);
+    primaryLabelMap.set(item.index.join(','), label);
+  }
+
+  // ---------------------------------------------------------------------
+  // search-result markers, connecting geodesics, cluster (tap) labels
+  // ---------------------------------------------------------------------
+  const SEARCH_COLORS = [0xfde68a, 0x93c5fd, 0xf9a8d4];
+  let searchMarkers = [];   // {mesh, glow, label, vec, index}
+  let arcLines = [];
+  let clusterLabels = [];
+
+  function clearSearchMarkers(){
+    for(const m of searchMarkers){
+      pointsGroup.remove(m.mesh, m.glow, m.label);
+      if(m.hiddenPrimaryLabel) m.hiddenPrimaryLabel.visible = true;
+    }
+    searchMarkers = [];
+    for(const l of arcLines){ pointsGroup.remove(l); }
+    arcLines = [];
+  }
+  function clearClusterLabels(){
+    for(const l of clusterLabels){ pointsGroup.remove(l); }
+    clusterLabels = [];
+  }
+
+  function addSearchMarker(indexTriple, colorIdx){
+    const v = toVec3(indexTriple);
+    const color = SEARCH_COLORS[colorIdx % SEARCH_COLORS.length];
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.046, 20, 14), new THREE.MeshBasicMaterial({ color }));
+    mesh.position.copy(v);
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(color), transparent:true, depthWrite:false, opacity:0.85 }));
+    glow.scale.set(0.4,0.4,1); glow.position.copy(v);
+    const label = makeLabelSprite(indexTriple, { color: '#' + color.toString(16).padStart(6,'0') });
+    label.position.copy(v).multiplyScalar(1.16);
+    pointsGroup.add(mesh, glow, label);
+    // if this point already has a permanent {001}/{011}/{111} label, hide that one
+    // instead of drawing both on top of each other
+    const permLabel = primaryLabelMap.get(indexTriple.join(','));
+    if(permLabel) permLabel.visible = false;
+    const entry = { mesh, glow, label, vec:v, index:indexTriple, color, hiddenPrimaryLabel: permLabel || null };
+    searchMarkers.push(entry);
+    return entry;
+  }
+
+  function addGeodesicArc(v1, v2, color){
+    const theta = v1.angleTo(v2);
+    if(theta < 1e-4) return;
+    const segs = 64;
+    const pts = [];
+    for(let i=0;i<=segs;i++){
+      const t = i/segs;
+      const a = Math.sin((1-t)*theta)/Math.sin(theta);
+      const b = Math.sin(t*theta)/Math.sin(theta);
+      const p = new THREE.Vector3(
+        v1.x*a + v2.x*b,
+        v1.y*a + v2.y*b,
+        v1.z*a + v2.z*b
+      ).normalize().multiplyScalar(1.001);
+      pts.push(p);
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color, transparent:true, opacity:0.95 }));
+    pointsGroup.add(line);
+    arcLines.push(line);
+  }
+
+  function angleDeg(v1, v2){
+    return THREE.MathUtils.radToDeg(v1.angleTo(v2));
+  }
+
+  // ---------------------------------------------------------------------
+  // camera: fixed position, zoom only. All rotation happens on worldGroup.
+  // ---------------------------------------------------------------------
+  let camRadius = 3.1;
+  const MIN_R = 0.25, MAX_R = 7.5; // zooming below the globe radius (~0.965) takes you inside it
+  function updateCameraPosition(){
+    camera.position.set(0, 0, camRadius);
+    camera.up.set(0,1,0);
+    camera.lookAt(0,0,0);
+  }
+  // pleasant initial tilt so we aren't staring straight down an axis
+  worldGroup.quaternion.setFromEuler(new THREE.Euler(-0.55, 0.6, 0));
+  updateCameraPosition();
+
+  let targetQuat = null; // set during "focus on point" animation
+
+  // -------- free trackball-style rotation (quaternion based, no clamping) --------
+  // Works with mouse (drag + wheel) and touch (one-finger drag to rotate,
+  // two-finger pinch to zoom) via the unified Pointer Events API.
+  let dragging = false, lastX=0, lastY=0, moved=false;
+  let velX = 0, velY = 0; // inertia
+  const dom = renderer.domElement;
+  const ROT_SPEED = 0.0055;
+
+  const activePointers = new Map(); // pointerId -> {x,y}
+  let pinching = false, pinchStartDist = 0, pinchStartRadius = camRadius;
+
+  function pinchDistance(){
+    const pts = Array.from(activePointers.values());
+    return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+  }
+
+  dom.addEventListener('pointerdown', (e)=>{
+    dom.setPointerCapture(e.pointerId);
+    activePointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
+
+    if(activePointers.size >= 2){
+      pinching = true;
+      dragging = false;
+      pinchStartDist = pinchDistance();
+      pinchStartRadius = camRadius;
+    } else {
+      pinching = false;
+      dragging = true; moved = false; lastX = e.clientX; lastY = e.clientY;
+      velX = 0; velY = 0;
+      targetQuat = null;
+      dom.classList.add('dragging');
+    }
+  });
+
+  dom.addEventListener('pointermove', (e)=>{
+    if(!activePointers.has(e.pointerId) && activePointers.size===0) updateTooltip(e);
+    if(!activePointers.has(e.pointerId)) return;
+    activePointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
+
+    if(pinching && activePointers.size >= 2){
+      const dist = pinchDistance();
+      const scaleFactor = pinchStartDist / Math.max(dist, 1);
+      camRadius = Math.max(MIN_R, Math.min(MAX_R, pinchStartRadius * scaleFactor));
+      return;
+    }
+    if(!dragging) return;
+    updateTooltip(e);
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    if(Math.abs(dx)+Math.abs(dy) > 2) moved = true;
+    lastX = e.clientX; lastY = e.clientY;
+    applyRotation(dx, dy);
+    velX = dx; velY = dy;
+  });
+
+  function endPointer(e){
+    activePointers.delete(e.pointerId);
+    if(activePointers.size >= 2){
+      // still pinching with the remaining fingers: restart the pinch baseline
+      pinching = true;
+      pinchStartDist = pinchDistance();
+      pinchStartRadius = camRadius;
+    } else if(activePointers.size === 1){
+      // dropped from pinch (or a multi-touch mis-tap) back to a single finger:
+      // resume rotation from wherever that finger currently is
+      pinching = false;
+      const remaining = Array.from(activePointers.values())[0];
+      lastX = remaining.x; lastY = remaining.y;
+      dragging = true; moved = true; // suppress an accidental "click" after a pinch
+    } else {
+      if(dragging && !moved) handleClick(e);
+      pinching = false;
+      dragging = false;
+      dom.classList.remove('dragging');
+    }
+  }
+  window.addEventListener('pointerup', endPointer);
+  window.addEventListener('pointercancel', endPointer);
+
+  dom.addEventListener('wheel', (e)=>{
+    e.preventDefault();
+    camRadius += e.deltaY * 0.0025;
+    camRadius = Math.max(MIN_R, Math.min(MAX_R, camRadius));
+  }, { passive:false });
+
+  function applyRotation(dx, dy){
+    const qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), dy*ROT_SPEED);
+    const qy = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), dx*ROT_SPEED);
+    worldGroup.quaternion.premultiply(qx).premultiply(qy);
+  }
+
+  document.getElementById('reset-btn').addEventListener('click', ()=>{
+    clearSearchMarkers();
+    clearClusterLabels();
+    targetQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.55, 0.6, 0));
+    camRadius = 3.1;
+    document.getElementById('search-input').value = '';
+    document.getElementById('search-msg').textContent = '';
+    setInfo(null);
+  });
+
+  // ---------------------------------------------------------------------
+  // picking — nearest point to the pointer in SCREEN SPACE (not a raycast
+  // hit-test), because the little dots are a tiny target to tap precisely.
+  // Once the camera has zoomed past the globe's surface (camRadius below
+  // the globe radius) we are "inside" the globe: the globe shell is culled
+  // by three.js from the inside automatically, so every point — including
+  // ones that used to be on the far/opposite side — becomes reachable.
+  // ---------------------------------------------------------------------
+  const GLOBE_RADIUS = 0.965;
+  const tooltipEl = document.getElementById('tooltip');
+
+  function insideGlobe(){ return camRadius <= GLOBE_RADIUS + 0.05; }
+
+  function collectCandidates(){
+    worldGroup.updateMatrixWorld(true);
+    const inside = insideGlobe();
+    const list = [];
+    for(let i=0;i<secondaryPoints.length;i++){
+      const world = secVecs[i].clone().applyMatrix4(worldGroup.matrixWorld);
+      if(!inside && world.z <= 0.02) continue; // hidden on the far side of the globe
+      list.push({ local: secVecs[i], world, index: secondaryPoints[i], isPrimary:false });
+    }
+    for(const item of primaryMeshes){
+      const world = item.vec.clone().applyMatrix4(worldGroup.matrixWorld);
+      if(!inside && world.z <= 0.02) continue;
+      list.push({ local: item.vec, world, index: item.index, isPrimary:true });
+    }
+    return list;
+  }
+
+  function nearestToScreen(clientX, clientY, maxDist){
+    const rect = dom.getBoundingClientRect();
+    const cx = clientX - rect.left, cy = clientY - rect.top;
+    const candidates = collectCandidates();
+    let best = null, bestD = Infinity;
+    for(const c of candidates){
+      const p = c.world.clone().project(camera);
+      if(p.z > 1) continue; // behind the camera's near plane
+      const sx = (p.x*0.5+0.5) * rect.width, sy = (-p.y*0.5+0.5) * rect.height;
+      const d = Math.hypot(sx - cx, sy - cy);
+      if(d < bestD){ bestD = d; best = c; }
+    }
+    if(best && bestD <= maxDist) return { hit: best, dist: bestD, candidates, rect, cx, cy };
+    return null;
+  }
+
+  function updateTooltip(e){
+    const found = nearestToScreen(e.clientX, e.clientY, 26);
+    if(found){
+      tooltipEl.style.display = 'block';
+      tooltipEl.style.left = e.clientX + 'px';
+      tooltipEl.style.top = e.clientY + 'px';
+      tooltipEl.textContent = formatTriple(found.hit.index);
+      dom.style.cursor = dragging ? 'grabbing' : 'pointer';
+    } else {
+      tooltipEl.style.display = 'none';
+      dom.style.cursor = dragging ? 'grabbing' : 'grab';
+    }
+  }
+
+  function handleClick(e){
+    const found = nearestToScreen(e.clientX, e.clientY, 55);
+    if(!found) return;
+    clearSearchMarkers();
+    clearClusterLabels();
+    addSearchMarker(found.hit.index, 0);
+    setInfo([found.hit.index]);
+    showNearbyLabels(found);
+  }
+
+  // -------- show labels for points clustered around a tap --------
+  function showNearbyLabels(found){
+    const { candidates, rect, cx, cy, hit } = found;
+    const scored = [];
+    for(const c of candidates){
+      const p = c.world.clone().project(camera);
+      if(p.z > 1) continue;
+      const sx = (p.x*0.5+0.5) * rect.width, sy = (-p.y*0.5+0.5) * rect.height;
+      const d = Math.hypot(sx - cx, sy - cy);
+      if(d < 160) scored.push({ c, d });
+    }
+    scored.sort((a,b)=>a.d-b.d);
+    const picked = scored.slice(0, 40);
+    for(const { c } of picked){
+      if(c.isPrimary) continue;              // already permanently labeled
+      if(c.index === hit.index) continue;    // already has the big search-marker label
+      const label = makeLabelSprite(c.index, { small:true, color:'#c6ccd3' });
+      label.position.copy(c.local).multiplyScalar(1.09);
+      pointsGroup.add(label);
+      clusterLabels.push(label);
+    }
+  }
+
+  function setInfo(indexList){
+    const el = document.getElementById('info');
+    if(!indexList || !indexList.length){
+      el.classList.add('empty');
+      el.innerHTML = '<div class="idx">点をタップ、または検索</div><div class="sub">&nbsp;</div>';
+      return;
+    }
+    el.classList.remove('empty');
+    if(indexList.length === 1){
+      const p = indexList[0];
+      const t = formatTriple(p);
+      let fam = 'その他';
+      const key = p.join(',');
+      if(primaryKeySet.has(key)){
+        if(FAMILY_100.some(q=>q.join(',')===key)) fam = '{001} 族';
+        else if(FAMILY_110.some(q=>q.join(',')===key)) fam = '{011} 族';
+        else if(FAMILY_111.some(q=>q.join(',')===key)) fam = '{111} 族';
+      }
+      el.innerHTML = `<div class="idx">(${t}) &nbsp;/&nbsp; [${t}]</div>
+        <div class="sub">面 (hkl) ・ 方位 [uvw] ・ ${fam}</div>`;
+      return;
+    }
+    // multi-point: list each + pairwise angles
+    let html = '';
+    indexList.forEach((p,i)=>{
+      const color = '#' + SEARCH_COLORS[i % SEARCH_COLORS.length].toString(16).padStart(6,'0');
+      html += `<div class="pt-row"><span class="pt-sw" style="background:${color}"></span>P${i+1}: (${formatTriple(p)}) / [${formatTriple(p)}]</div>`;
+    });
+    html += '<div class="angles">';
+    for(let i=0;i<indexList.length;i++){
+      for(let j=i+1;j<indexList.length;j++){
+        const a = angleDeg(toVec3(indexList[i]), toVec3(indexList[j]));
+        html += `<div>∠(P${i+1}-P${j+1}) = ${a.toFixed(2)}°</div>`;
+      }
+    }
+    html += '</div>';
+    el.innerHTML = html;
+  }
+
+  // ---------------------------------------------------------------------
+  // search: single, or 2–3 points separated by ; | newline or bracket groups
+  // ---------------------------------------------------------------------
+  function parseOneIndex(raw){
+    let s = raw.trim();
+    if(!s) return null;
+    s = s.replace(/[\[\]\(\)]/g, '');
+    s = s.replace(/(\d)\u0305/g, '-$1');
+    if(/[\s,]/.test(s)){
+      const parts = s.split(/[\s,]+/).filter(Boolean).map(Number);
+      if(parts.length >= 3 && parts.slice(0,3).every(n => Number.isFinite(n))) return parts.slice(0,3).map(n=>Math.trunc(n));
+      return null;
+    }
+    const nums = []; let sign = 1; let i = 0;
+    while(i < s.length && nums.length < 3){
+      const ch = s[i];
+      if(ch === '-'){ sign = -1; i++; continue; }
+      if(ch === '+'){ sign = 1; i++; continue; }
+      if(/\d/.test(ch)){ nums.push(sign * parseInt(ch,10)); sign = 1; i++; continue; }
+      i++;
+    }
+    return nums.length === 3 ? nums : null;
+  }
+
+  function parseMultiIndices(raw){
+    const bracketGroups = raw.match(/\[[^\]\[]*\]|\([^\)\(]*\)/g);
+    if(bracketGroups && bracketGroups.length >= 2){
+      const out = bracketGroups.slice(0,3).map(parseOneIndex).filter(Boolean);
+      return out.length >= 2 ? out : null;
+    }
+    if(/[;|\n]/.test(raw)){
+      const parts = raw.split(/[;|\n]+/).map(s=>s.trim()).filter(Boolean);
+      if(parts.length >= 2){
+        const out = parts.slice(0,3).map(parseOneIndex).filter(Boolean);
+        return out.length >= 2 ? out : null;
+      }
+    }
+    const single = parseOneIndex(raw);
+    return single ? [single] : null;
+  }
+
+  function faceCameraQuat(v){
+    return new THREE.Quaternion().setFromUnitVectors(v.clone().normalize(), new THREE.Vector3(0,0,1));
+  }
+
+  const searchInput = document.getElementById('search-input');
+  const searchMsg = document.getElementById('search-msg');
+  const searchBtn = document.getElementById('search-btn');
+
+  function runSearch(){
+    const raw = searchInput.value;
+    const groups = parseMultiIndices(raw);
+    if(!groups || groups.some(g => g[0]===0 && g[1]===0 && g[2]===0)){
+      searchMsg.textContent = '形式が読み取れません (例: 111 / 100;010;111)';
+      searchMsg.classList.add('err');
+      return;
+    }
+    const reduced = groups.map(reduceTriple);
+    clearSearchMarkers();
+    clearClusterLabels();
+
+    const markers = reduced.map((p, i) => addSearchMarker(p, i));
+    for(let i=0;i<markers.length;i++){
+      for(let j=i+1;j<markers.length;j++){
+        addGeodesicArc(markers[i].vec, markers[j].vec, 0xfff3c4);
+      }
+    }
+    const avg = new THREE.Vector3();
+    markers.forEach(m => avg.add(m.vec));
+    avg.normalize();
+    targetQuat = faceCameraQuat(avg);
+
+    setInfo(reduced);
+    if(reduced.length === 1){
+      searchMsg.textContent = `→ (${formatTriple(reduced[0])}) を表示`;
+    } else {
+      searchMsg.textContent = `→ ${reduced.length}点を表示・線分と角度を計算`;
+    }
+    searchMsg.classList.remove('err');
+  }
+  searchBtn.addEventListener('click', runSearch);
+  searchInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') runSearch(); });
+
+  // ---------------------------------------------------------------------
+  // render loop
+  // ---------------------------------------------------------------------
+  const insideBadge = document.getElementById('inside-badge');
+  let badgeShown = false;
+
+  function animate(){
+    requestAnimationFrame(animate);
+
+    const inside = insideGlobe();
+    if(inside !== badgeShown){
+      insideBadge.style.display = inside ? 'block' : 'none';
+      badgeShown = inside;
+    }
+
+    if(!dragging){
+      if(targetQuat){
+        worldGroup.quaternion.slerp(targetQuat, 0.12);
+        if(worldGroup.quaternion.angleTo(targetQuat) < 0.001) targetQuat = null;
+      } else if(Math.abs(velX) + Math.abs(velY) > 0.05){
+        applyRotation(velX, velY);
+        velX *= 0.94; velY *= 0.94;
+      }
+    }
+
+    updateCameraPosition();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', ()=>{
+    camera.aspect = wrap.clientWidth / wrap.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+  });
+
+  // ---------------------------------------------------------------------
+  // integration API used by the outer page to embed / drive this view
+  // ---------------------------------------------------------------------
+  window.CrystalGlobe = {
+    runSearchWith: function(text){
+      searchInput.value = text;
+      runSearch();
+    },
+    resize: function(){
+      camera.aspect = wrap.clientWidth / wrap.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+    }
+  };
+
+
+};
+</script>
+<script>
+(function(){
+const $=id=>document.getElementById(id),cv=$('st-canvas'),ctx=cv.getContext('2d');
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b)[a,b]=[b,a%b];return a};
+const fmt=n=>n<0?Math.abs(n)+'\u0305':''+n,fI=p=>p.map(fmt).join('');
+const COL=['#fde68a','#93c5fd','#f9a8d4'];
+const FAM={'0,0,1':['#e3a13d',6],'0,1,1':['#3fb6ac',5],'1,1,1':['#d9585a',5.5]};
+const unit=p=>{const n=Math.hypot(...p);return p.map(x=>x/n)};
+const pts=[];
+for(let h=-5;h<=5;h++)for(let k=-5;k<=5;k++)for(let l=-5;l<=5;l++){
+  if((!h&&!k&&!l)||gcd(gcd(h,k),l)!==1)continue;
+  pts.push({i:[h,k,l],v:unit([h,k,l]),f:FAM[[h,k,l].map(Math.abs).sort().join()],m:Math.max(Math.abs(h),Math.abs(k),Math.abs(l))});
+}
+const I3=[1,0,0,0,1,0,0,0,1];
+const mm=(A,B)=>{const C=[];for(let i=0;i<3;i++)for(let j=0;j<3;j++)C.push(A[3*i]*B[j]+A[3*i+1]*B[3+j]+A[3*i+2]*B[6+j]);return C};
+const mv=(A,v)=>[0,1,2].map(i=>A[3*i]*v[0]+A[3*i+1]*v[1]+A[3*i+2]*v[2]);
+const rot=(a,t)=>{const[x,y,z]=unit(a),c=Math.cos(t),s=Math.sin(t),d=1-c;return[c+x*x*d,x*y*d-z*s,x*z*d+y*s,y*x*d+z*s,c+y*y*d,y*z*d-x*s,z*x*d-y*s,z*y*d+x*s,c+z*z*d]};
+let R=I3.slice(),inside=true,N=3,zoom=1,psiPrev=0,marks=[],lab=false,hov=null,vis=[],W=300,H=300,cx=150,cy=150,rad=130;
+const sg=()=>inside?-1:1;
+const P=p=>{const s=1/(1+p[2]);return[cx+sg()*p[0]*s*rad,cy-p[1]*s*rad]};
+const D2R=Math.PI/180;
+function parseOne(raw){let s=(raw||'').trim().replace(/[\[\]()]/g,'').replace(/(\d)\u0305/g,'-$1');if(!s)return null;
+  if(/[\s,]/.test(s)){const a=s.split(/[\s,]+/).filter(Boolean).map(Number);return a.length>=3&&a.slice(0,3).every(Number.isFinite)?a.slice(0,3).map(Math.trunc):null}
+  const n=[];let g=1;for(const ch of s){if(ch==='-')g=-1;else if(/\d/.test(ch)){n.push(g*+ch);g=1}}
+  return n.length===3?n:null}
+function net(){
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,rad,0,7);ctx.clip();ctx.lineWidth=1;
+  const ln=fn=>{ctx.beginPath();for(let a=-90;a<=90;a+=2){const[x,y]=P(fn(a*D2R));a===-90?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke()};
+  for(let d=-88;d<=88;d+=2){
+    ctx.strokeStyle=d===0?'#5b6e84':d%10===0?'#3a4a5c':'#1b2530';const f=d*D2R,cf=Math.cos(f),sf=Math.sin(f);
+    ln(a=>[Math.cos(a)*sf,Math.sin(a),Math.cos(a)*cf]);
+    ln(a=>[cf*Math.sin(a),sf,cf*Math.cos(a)]);
+  }
+  ctx.restore();ctx.strokeStyle='#7f93a8';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,rad,0,7);ctx.stroke();
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);rad=Math.min(W,H)/2*0.9*zoom;cx=W/2;cy=H/2;net();vis=[];
+  ctx.textBaseline='alphabetic';
+  for(const q of pts){
+    if(q.m>N&&!q.f)continue;const p=mv(R,q.v);if(p[2]<-1e-9)continue;const[x,y]=P(p);vis.push({q,x,y});
+    if(q.f){ctx.fillStyle=q.f[0];ctx.beginPath();ctx.arc(x,y,q.f[1],0,7);ctx.fill();ctx.font='600 12px ui-monospace,Menlo,monospace';ctx.fillStyle='#e8ecf0';ctx.fillText(fI(q.i),x+8,y-8)}
+    else{ctx.fillStyle='#7c8794';ctx.beginPath();ctx.arc(x,y,2.2,0,7);ctx.fill();if(lab){ctx.font='10px ui-monospace,Menlo,monospace';ctx.fillStyle='#aab3bd';ctx.fillText(fI(q.i),x+4,y-4)}}
+  }
+  ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx-9,cy);ctx.lineTo(cx+9,cy);ctx.moveTo(cx,cy-9);ctx.lineTo(cx,cy+9);ctx.stroke();
+  for(let a=0;a<marks.length;a++)for(let b=a+1;b<marks.length;b++){
+    const u=marks[a].v,v=marks[b].v,t=Math.acos(Math.max(-1,Math.min(1,u[0]*v[0]+u[1]*v[1]+u[2]*v[2])));if(t<1e-4)continue;
+    ctx.strokeStyle='#fff3c4';ctx.lineWidth=1.6;ctx.beginPath();let pf=null;
+    for(let k=0;k<=80;k++){const s=k/80,A=Math.sin((1-s)*t)/Math.sin(t),B=Math.sin(s*t)/Math.sin(t);let p=mv(R,[u[0]*A+v[0]*B,u[1]*A+v[1]*B,u[2]*A+v[2]*B]);const fl=p[2]<0;if(fl)p=p.map(z=>-z);const[x,y]=P(p);(k===0||fl!==pf)?ctx.moveTo(x,y):ctx.lineTo(x,y);pf=fl}
+    ctx.stroke();
+  }
+  marks.forEach((m,j)=>{let p=mv(R,m.v);const hid=p[2]<0;if(hid)p=p.map(z=>-z);const[x,y]=P(p);
+    ctx.strokeStyle=COL[j];ctx.lineWidth=2.2;ctx.setLineDash(hid?[4,3]:[]);ctx.beginPath();ctx.arc(x,y,9,0,7);ctx.stroke();ctx.setLineDash([]);
+    ctx.font='700 15px ui-monospace,Menlo,monospace';ctx.fillStyle=COL[j];ctx.fillText('P'+(j+1)+' '+fI(m.i)+(hid?' (裏側)':''),x+12,y-10)});
+  ctx.font='12px sans-serif';ctx.fillStyle='#838c96';ctx.fillText(inside?'結晶側から見た像(ラウエ写真と同じ向き)':'外側から見た像',12,20);
+  if(hov){const t=fI(hov.q.i);ctx.font='13px ui-monospace,Menlo,monospace';const w=ctx.measureText(t).width+12;ctx.fillStyle='rgba(20,23,28,.95)';ctx.fillRect(hov.x-w/2,hov.y-30,w,20);ctx.fillStyle='#fff';ctx.fillText(t,hov.x-w/2+6,hov.y-15)}
+}
+function info(){
+  const el=$('st-info');if(!marks.length){el.textContent='点をクリック、または検索';return}
+  let h='';marks.forEach((m,j)=>{const p=mv(R,m.v),a=Math.acos(Math.min(1,Math.abs(p[2])))/D2R;h+=`<div><span style="color:${COL[j]}">●</span> P${j+1} [${fI(m.i)}] 光軸から ${a.toFixed(1)}°</div>`});
+  for(let a=0;a<marks.length;a++)for(let b=a+1;b<marks.length;b++){const u=marks[a].v,v=marks[b].v,d=Math.acos(Math.max(-1,Math.min(1,u[0]*v[0]+u[1]*v[1]+u[2]*v[2])))/D2R;h+=`<div>∠P${a+1}–P${b+1} = ${d.toFixed(2)}°</div>`}
+  el.innerHTML=h;
+}
+const redraw=()=>{draw();info()};
+function resize(){const r=cv.parentNode.getBoundingClientRect(),d=window.devicePixelRatio||1;if(!r.width)return;cv.width=r.width*d;cv.height=r.height*d;W=r.width;H=r.height;ctx.setTransform(d,0,0,d,0,0);redraw()}
+function setCenter(txt){const a=parseOne(txt);if(!a||(!a[0]&&!a[1]&&!a[2])){$('st-msg').textContent='中心の指数が読み取れません';return}
+  const v=unit(a),c=v[2];R=c>0.999999?I3.slice():c<-0.999999?rot([1,0,0],Math.PI):rot([v[1],-v[0],0],Math.acos(c));
+  psiPrev=0;$('st-psi').value=0;$('st-psiv').textContent='0°';$('st-msg').textContent='';redraw()}
+function run(txt){const parts=String(txt).split(/[;|\n]+/).map(parseOne).filter(Boolean).slice(0,3);
+  if(!parts.length||parts.some(g=>!g[0]&&!g[1]&&!g[2])){$('st-msg').textContent='形式が読み取れません(例: 001;-1-13;-101)';return}
+  marks=parts.map(g=>{const d=gcd(gcd(g[0],g[1]),g[2]),r=g.map(x=>x/d);return{i:r,v:unit(r)}});
+  $('st-search').value=txt;$('st-msg').textContent=marks.length+'点を表示';redraw()}
+let drag=null;
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,mv:false}});
+cv.addEventListener('pointermove',e=>{
+  if(drag){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>2)drag.mv=true;
+    if(drag.mv){const k=0.006/zoom;R=mm(rot([1,0,0],dy*k),mm(rot([0,1,0],sg()*dx*k),R));drag.x=e.clientX;drag.y=e.clientY;hov=null;redraw()}return}
+  const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;let b=null,bd=13;
+  for(const t of vis){const d=Math.hypot(t.x-mx,t.y-my);if(d<bd){bd=d;b=t}}
+  if((b&&1)!==(hov&&1)||(b&&hov&&b.q!==hov.q)){hov=b;draw()}});
+cv.addEventListener('pointerup',e=>{
+  if(drag&&!drag.mv){const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;let b=null,bd=20;
+    for(const t of vis){const d=Math.hypot(t.x-mx,t.y-my);if(d<bd){bd=d;b=t}}
+    if(b){if(marks.length>=3)marks=[];marks.push({i:b.q.i,v:b.q.v});redraw()}}
+  drag=null});
+cv.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(1,Math.min(6,zoom*Math.exp(-e.deltaY*0.0015)));$('st-zoom').value=zoom;redraw()},{passive:false});
+$('st-zoom').oninput=e=>{zoom=+e.target.value;redraw()};
+$('st-psi').oninput=e=>{const v=+e.target.value;R=mm(rot([0,0,1],sg()*(v-psiPrev)*D2R),R);psiPrev=v;$('st-psiv').textContent=v+'°';redraw()};
+$('st-n').onchange=e=>{N=+e.target.value;redraw()};
+$('st-in').onchange=e=>{inside=e.target.checked;redraw()};
+$('st-lab').onchange=e=>{lab=e.target.checked;redraw()};
+$('st-setc').onclick=()=>setCenter($('st-center').value);
+$('st-center').onkeydown=e=>{if(e.key==='Enter')setCenter(e.target.value)};
+$('st-go').onclick=()=>run($('st-search').value);
+$('st-search').onkeydown=e=>{if(e.key==='Enter')run(e.target.value)};
+$('st-ex').onclick=()=>{setCenter('001');run('001;-1-13;-101')};
+$('st-reset').onclick=()=>{zoom=1;$('st-zoom').value=1;marks=[];$('st-search').value='';setCenter('001')};
+$('st-clr').onclick=()=>{marks=[];$('st-search').value='';$('st-msg').textContent='';redraw()};
+window.addEventListener('resize',resize);
+if(window.ResizeObserver)new ResizeObserver(resize).observe(cv.parentNode);
+window.__stResize=resize;window.__stRun=run;
+})();
+</script>
+</body>
+</html>
